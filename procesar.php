@@ -19,7 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $auxilio_alimentacion = (int)$POST['auxilio_alimentacion'];
 
 
+    /*
+        ==========================================
+        ==========================================
+                        DEVENGADOS
+        ==========================================
+        ==========================================
     
+    */
     // Validar de forma básica que los datos no estén vacíos o sean incorrectos
     if (!empty($nombre) && !empty($departamento) && !empty($cargo)
         && $identificacion >= 0 && $dias_trabajados >= 0) {
@@ -56,6 +63,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $total_devengado = $salario + $vacaciones + $auxilioTransporte + $pago_incapacidad 
         + $incapacidad_ARL + $recargo_total + $total_dominical + $auxilio_alimentacion;
         
+        /*
+        ==========================================
+        ==========================================
+                    DEDUCCIONES NOMINALES
+        ==========================================
+        ==========================================
+        */
+        $SMMLV = 1750905;
+        $salud = $IBC * 0.04;
+        $pension = $IBC * 0.04;
+        if(IBC < $SMMLV * 4){   
+            $fondo_solidaridad_pensional = 0;
+        }
+        else if(IBC > $SMMLV*4 && IBC <= $SMMLV *16){
+            $fondo_solidaridad_pensional = $IBC * 0.010; 
+        }
+        else if(IBC > $SMMLV*16 && IBC <= $SMMLV *17){
+            $fondo_solidaridad_pensional = $IBC * 0.012; 
+        }
+        else if(IBC > $SMMLV*17 && IBC <= $SMMLV *18){
+            $fondo_solidaridad_pensional = $IBC * 0.014; 
+        }
+        else if(IBC > $SMMLV*18 && IBC <= $SMMLV *19){
+            $fondo_solidaridad_pensional = $IBC * 0.016; 
+        }
+        else if(IBC > $SMMLV*19 && IBC <= $SMMLV *20){
+            $fondo_solidaridad_pensional = $IBC * 0.018; 
+        }
+        else if(IBC > $SMMLV*20){
+            $fondo_solidaridad_pensional = $IBC * 0.020; 
+        }
 
         // Leer los usuarios existentes en el archivo JSON
         $usuarios = [];
