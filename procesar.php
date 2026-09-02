@@ -113,8 +113,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ==========================================
         */
 		$cuotas_por_descontar = $numero_cuotas_a_descontar - $numero_de_cuota_pagada;
+		$total_deducciones = $salud + $pension + $fondo_solidaridad_pensional + $valor_cuota;
+		$total_nomina_a_pagar = $total_devengado - $total_deducciones;
+		 
+		/*
+        ==========================================
+        ==========================================
+                    PRESTACIONES SOCIALES
+        ==========================================
+        ==========================================
+        */
+        $prestaciones_prima = $sueldo + $auxilioTransporte * 0.0833;
+        $prestaciones_cesantias = $sueldo + $auxilioTransporte * 0.0833;
+        $prestaciones_interes_cesantias = ($prestaciones_cesantias * $dias_trabajados * 0.12) / 360;
+        $prestaciones_vacaciones = $sueldo * 0.0417;
+        $total_prestaciones = $prestaciones_prima + $prestaciones_cesantias + $prestaciones_interes_cesantias + $prestaciones_vacaciones;
 
-
+		
 
         // Leer los usuarios existentes en el archivo JSON
         $usuarios = [];
@@ -167,7 +182,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Deducciones de ley
             'salud' => $salud,
             'pension' => $pension,
-            'fondo_solidaridad_pensional' => $fondo_solidaridad_pensional
+            'fondo_solidaridad_pensional' => $fondo_solidaridad_pensional,
+
+            //AAA
+            'cuotas_por_descontar' => $cuotas_por_descontar,
+            'total_deducciones' => $total_deducciones,
+
+            //Nómina
+            'total_nomina_a_pagar' => $total_nomina_a_pagar,
+            // Provisiones de Prestaciones Sociales (Costo empresa)
+            'prestaciones_prima' => $prestaciones_prima,
+            'prestaciones_cesantias' => $prestaciones_cesantias,
+            'prestaciones_interes_cesantias' => $prestaciones_interes_cesantias,
+            'prestaciones_vacaciones' => $prestaciones_vacaciones,
+            'total_prestaciones' => $total_prestaciones
         ];
 
         // Añadir el nuevo registro al array de usuarios
