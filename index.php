@@ -91,11 +91,11 @@ if (file_exists('usuarios.json')) {
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Monto del desembolso ($):</label>
-                        <input type="number" name="monto_del_desembolso" class="form-control" min="0" value="0">
+                        <input type="number" name="monto_del_desembolso" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">No. cuotas totales:</label>
-                        <input type="number" name="numero_cuotas_descontar" class="form-control" min="0" value="0">
+                        <input type="number" name="numero_cuotas_descontar" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Fecha del desembolso:</label>
@@ -103,7 +103,7 @@ if (file_exists('usuarios.json')) {
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">No. cuota pagada actual:</label>
-                        <input type="number" name="numero_de_cuota_pagada" class="form-control" min="0" value="0">
+                        <input type="number" name="numero_de_cuota_pagada" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Nomina finaliza prestamo:</label>
@@ -111,11 +111,11 @@ if (file_exists('usuarios.json')) {
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Valor cuota mensual ($):</label>
-                        <input type="number" name="valor_cuota" class="form-control" min="0" value="0">
+                        <input type="number" name="valor_cuota" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Saldo del prestamo ($):</label>
-                        <input type="number" name="saldo_del_prestamo" class="form-control" min="0" value="0">
+                        <input type="number" name="saldo_del_prestamo" class="form-control" min="0" placeholder="0">
                     </div>
                 </div>
             </div>

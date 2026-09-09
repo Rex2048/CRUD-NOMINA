@@ -156,6 +156,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $prestaciones_vacaciones = $sueldo * 0.0417;
         $total_prestaciones = $prestaciones_prima + $prestaciones_cesantias + $prestaciones_interes_cesantias + $prestaciones_vacaciones;
 
+
+
+        /*
+        ==========================================
+        ==========================================
+                    COSTES DE LA EMPRESA
+        ==========================================
+        ==========================================
+        */
+        $pension_patronal = $IBC * 0.12;     
+        $arl_patronal     = $IBC * 0.00522;   
+        $caja_compensacion = $IBC * 0.04;     
+
+        if ($IBC < ($SMMLV * 10)) {
+            $salud_patronal = 0;
+            $sena           = 0;
+            $icbf           = 0;
+        } else {
+            $salud_patronal = $IBC * 0.085;   
+            $sena           = $IBC * 0.02;    
+            $icbf           = $IBC * 0.03;   
+        }
+
+        $total_aportes_patronales = $pension_patronal + $arl_patronal + $caja_compensacion + $salud_patronal + $sena + $icbf;
+
+        $coste_empresa_mensual = $total_devengado + $total_aportes_patronales + $total_prestaciones;
+        $coste_empresa_diario  = $coste_empresa_mensual / 30;
+        $coste_empresa_anual   = $coste_empresa_mensual * 12;
+
         // Leer los usuarios existentes en el archivo JSON
         $usuarios = [];
         if (file_exists($archivo_json)) {
@@ -226,7 +255,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'prestaciones_cesantias' => $prestaciones_cesantias,
             'prestaciones_interes_cesantias' => $prestaciones_interes_cesantias,
             'prestaciones_vacaciones' => $prestaciones_vacaciones,
-            'total_prestaciones' => $total_prestaciones
+            'total_prestaciones' => $total_prestaciones,
+
+            // costes de la empresa
+            'coste_empresa_diario'  => $coste_empresa_diario,
+            'coste_empresa_mensual' => $coste_empresa_mensual,
+            'coste_empresa_anual'   => $coste_empresa_anual
         ];
 
         // Añadir el nuevo registro al array de usuarios
