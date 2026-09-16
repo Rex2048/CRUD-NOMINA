@@ -5,6 +5,9 @@ if (file_exists('usuarios.json')) {
     $contenido = file_get_contents('usuarios.json');
     $usuarios = json_decode($contenido, true) ?? [];
 }
+
+// parametro para el procesar
+$mensaje = $_GET['msg'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
@@ -19,7 +22,7 @@ if (file_exists('usuarios.json')) {
 <div class="container">
     <h2 class="mb-4 text-center text-primary">Sistema de Gestion de Nomina</h2>
 
-    <form action="procesar.php" method="POST">
+    <form action="procesar.php" method="POST" id="formNomina">
         <!-- seccion 1 -->
         <div class="card border-secondary mb-4 bg-dark-subtle">
             <div class="card-header bg-secondary text-white fw-bold">
@@ -45,7 +48,7 @@ if (file_exists('usuarios.json')) {
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Sueldo base ($):</label>
-                        <input type="number" name="sueldo" class="form-control" required placeholder="4240000">
+                        <input type="number" name="sueldo" id="sueldo" class="form-control" required placeholder="4240000">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Dias laborados:</label>
@@ -72,7 +75,7 @@ if (file_exists('usuarios.json')) {
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Horas dominicales / festivas:</label>
-                        <input type="number" name="dias_dominicales" class="form-control" min="0"  placeholder="0">
+                        <input type="number" name="dias_dominicales" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Aux. alimentacion (No Prestacional):</label>
@@ -91,11 +94,11 @@ if (file_exists('usuarios.json')) {
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Monto del desembolso ($):</label>
-                        <input type="number" name="monto_del_desembolso" class="form-control" min="0" value="0">
+                        <input type="number" name="monto_del_desembolso" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">No. cuotas totales:</label>
-                        <input type="number" name="numero_cuotas_descontar" class="form-control" min="0" value="0">
+                        <input type="number" name="numero_cuotas_descontar" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Fecha del desembolso:</label>
@@ -103,7 +106,7 @@ if (file_exists('usuarios.json')) {
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">No. cuota pagada actual:</label>
-                        <input type="number" name="numero_de_cuota_pagada" class="form-control" min="0" value="0">
+                        <input type="number" name="numero_de_cuota_pagada" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Nomina finaliza prestamo:</label>
@@ -111,23 +114,23 @@ if (file_exists('usuarios.json')) {
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Valor cuota mensual ($):</label>
-                        <input type="number" name="valor_cuota" class="form-control" min="0" value="0">
+                        <input type="number" name="valor_cuota" class="form-control" min="0" placeholder="0">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Saldo del prestamo ($):</label>
-                        <input type="number" name="saldo_del_prestamo" class="form-control" min="0" value="0">
+                        <input type="number" name="saldo_del_prestamo" class="form-control" min="0" placeholder="0">
                     </div>
                 </div>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold mb-5 shadow">
-            guardar registro nomina
+        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold mb-3 shadow">
+            Guardar registro nomina
         </button>
+        
         <a href="nomina.php" class="btn btn-success btn-lg w-100 fw-bold mb-5 shadow" role="button">
-            ver nominas generales
+            Ver nominas generales
         </a>
-
     </form>
 
     <!-- TABLA DE REGISTROS -->
@@ -160,10 +163,9 @@ if (file_exists('usuarios.json')) {
                             <td class="text-danger">-$<?php echo number_format($usr['total_deducciones'] ?? 0, 0, ',', '.'); ?></td>
                             <td class="fw-bold text-warning">$<?php echo number_format($usr['total_nomina_a_pagar'] ?? 0, 0, ',', '.'); ?></td>
                             <td>
-                                <a class="btn btn-warning btn-sm fw-semibold me-1" href="procesar.php?accion=generar_pdf&id=<?php echo $usr['id']; ?>">PDF</a>
-                                <a class="btn btn-danger btn-sm fw-semibold" href="procesar.php?accion=eliminar&id=<?php echo $usr['id']; ?>" onclick="return confirm('¿Deseas eliminar este registro?');">Borrar</a>
+                                <a class="btn btn-warning btn-sm fw-semibold me-1" href="pdf.php?id=<?php echo $usr['id']; ?>" target="_blank">PDF</a>
+                                <a class="btn btn-danger btn-sm fw-semibold btn-eliminar" href="procesar.php?accion=eliminar&id=<?php echo $usr['id']; ?>">Borrar</a>
                             </td>
-                            
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -172,5 +174,88 @@ if (file_exists('usuarios.json')) {
     </div>
 </div>
 
+<script src="sw/package/dist/sweetalert2.all.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. validacion sueldo minimo
+    const formNomina = document.getElementById('formNomina');
+    formNomina.addEventListener('submit', (e) => {
+        const sueldoInput = document.getElementById('sueldo');
+        const sueldo = parseFloat(sueldoInput.value) || 0;
+
+        if (sueldo < 2000000) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Sueldo no válido',
+                text: 'El sueldo base no puede ser inferior al salario mínimo ($2.000.000).',
+                confirmButtonColor: '#d33',
+                background: '#212529',
+                color: '#fff'
+            });
+        }
+    });
+
+    // 2. eliminacion
+    const botonesEliminar = document.querySelectorAll('.btn-eliminar');
+    botonesEliminar.forEach(boton => {
+        boton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = boton.getAttribute('href');
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Esta acción eliminará el registro de nómina permanentemente.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: '#212529',
+                color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+
+    // 3. mensaje de exito al guardar y eliminar, se ve en procesar
+    const mensajeURL = "<?php echo $mensaje; ?>";
+
+    if (mensajeURL === 'creado') {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Registro Exitoso!',
+            text: 'La nómina del empleado ha sido guardada correctamente.',
+            timer: 3000,
+            showConfirmButton: false,
+            background: '#212529',
+            color: '#fff'
+        });
+    } else if (mensajeURL === 'eliminado') {
+        Swal.fire({
+            icon: 'info',
+            title: 'Registro Eliminado',
+            text: 'El registro se eliminó correctamente.',
+            timer: 2500,
+            showConfirmButton: false,
+            background: '#212529',
+            color: '#fff'
+        });
+    } else if (mensajeURL === 'error') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de Procesamiento',
+            text: 'Ocurrió un inconveniente al procesar los datos de nómina.',
+            background: '#212529',
+            color: '#fff'
+        });
+    }
+});
+</script>
 </body>
 </html>
